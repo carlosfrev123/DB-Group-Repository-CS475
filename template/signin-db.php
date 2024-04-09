@@ -2,12 +2,9 @@
 function addRequests($reqDate, $roomNumber, $reqBy, $repairDesc, $reqPriority)
 {
     global $db;
-    //$reqDate = date('Y-m-d');
-
-    //$query = "INSERT INTO requests (reqDate, roomNumber, reqBy, repairDesc, reqPriority) VALUES ('2024-03-18', 'ABC', 'Someone', 'fix light', 'low')";
     $query = "INSERT INTO requests (reqDate, roomNumber, reqBy, repairDesc, reqPriority) VALUES (:reqDate, :roomNumber, :reqBy, :repairDesc, :reqPriority)";
     
-    try{  
+    try{ 
         //$statement = $db->query($query);
 
         // prepared statement
@@ -35,14 +32,14 @@ function addRequests($reqDate, $roomNumber, $reqBy, $repairDesc, $reqPriority)
 
 function getAllRequests()
 {
-    // global $db;
-    // $query = "SELECT * FROM requests";
-    // $statement = $db->prepare($query);
-    // $statement->execute();
-    // $result = $statement->fetchAll(); //fetch all rows that we get as result fetch() for only first row
-    // $statement->closeCursor();
+    global $db;
+    $query = "SELECT * FROM requests";
+    $statement = $db->prepare($query);
+    $statement->execute();
+    $result = $statement->fetchAll(); //fetch all rows that we get as result fetch() for only first row
+    $statement->closeCursor();
 
-    // return $result;
+    return $result;
 }
 
 function getRequestById($id)  

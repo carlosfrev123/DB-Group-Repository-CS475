@@ -31,7 +31,7 @@
 
 /** S24, PHP (on GCP, local XAMPP, or CS server) connect to MySQL (on local XAMPP) **/
 // $username = 'cfr5spw';
-// $password = '';
+// $password = 'Alco0022!';
 // // $host = 'localhost:3306';
 // $dbname = 'cfr5spw';    
 // $dsn = "mysql:host=$host;dbname=$dbname";  
@@ -39,7 +39,7 @@
 
 /** S24, PHP (on GCP, local XAMPP, or CS server) connect to MySQL (on CS server) **/
 $username = 'cfr5spw'; 
-$password = '-';
+$password = 'Alco0022!';
 $host = 'mysql01.cs.virginia.edu';
 $dbname = 'cfr5spw';
 $dsn = "mysql:host=$host;dbname=$dbname";
@@ -82,7 +82,7 @@ try
    $db = new PDO($dsn, $username, $password);
    
    // dispaly a message to let us know that we are connected to the database 
-   echo "<p>You are connected to the database -- host=$host</p>";
+   // echo "<p>You are connected to the database -- host=$host</p>";
 }
 catch (PDOException $e)     // handle a PDO exception (errors thrown by the PDO library)
 {
