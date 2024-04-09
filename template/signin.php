@@ -1,23 +1,7 @@
 <?php 
 require("connect-db.php");
-require("request-db.php");
+//require("home-db.php");
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (!empty($_POST['addBtn'])) {
-        addRequests($_POST['requestedDate'], $_POST['roomNo'], $_POST['requestedBy'], $_POST['requestDesc'], $_POST['priority_option']);
-    } else if (!empty($_POST['updateBtn'])) {
-        // Handle update logic here
-    } else if (!empty($_POST['cofmBtn'])) {
-        updateRequest($_POST['cofm_reqId'], $_POST['requestedDate'], $_POST['roomNo'], $_POST['requestedBy'], $_POST['requestDesc'], $_POST['priority_option']);
-    } else if (!empty($_POST['deleteBtn'])) {
-        deleteRequest($_POST['reqId']);
-    }
-    // Redirect to the same page or another page after handling the POST request
-    header('Location: ' . $_SERVER['PHP_SELF']);
-    exit();
-}
-
-$list_of_requests = getAllRequests();
 ?>
 
 <!DOCTYPE html>

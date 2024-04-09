@@ -12,9 +12,9 @@
           <!-- check if currently logged in, display Log out button 
                otherwise, display sign up and log in buttons -->
           <?php if (!isset($_SESSION['username'])) { ?>              
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <a class="nav-link" href="register.php">Join our community</a>
-            </li>
+            </li> -->
             <li class="nav-item">
               <a class="nav-link" href="signin.php">Sign in/ Sign up</a>
             </li>              
@@ -24,10 +24,10 @@
             </li>
           <?php } ?>
         
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="#">Software</a>
-          </li>            
-          <li class="nav-item dropdown">
+          </li>             -->
+          <!-- <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="dropdown01" role="button" data-bs-toggle="dropdown" aria-expanded="false">Research</a>
             <ul class="dropdown-menu" aria-labelledby="dropdown01">
               <li><a class="dropdown-item" href="#">Design</a></li>
@@ -35,10 +35,10 @@
               <li><a class="dropdown-item" href="#">Testing</a></li>
               <li><a class="dropdown-item" href="#">Maintenance</a></li>
             </ul>
-          </li>
-          <li class="nav-item">
+          </li> -->
+          <!-- <li class="nav-item">
             <a class="nav-link" href="#">Activity</a>
-          </li>
+          </li> -->
           <li class="nav-item">
             <a class="nav-link" href="#">Contact</a>
           </li>
@@ -50,12 +50,12 @@
 
 <style>
   .bannercolor {
-    background-color: #FFB6C1; /* Pink banner color */
+    background-color: #FFB6C1; 
   }
   .navbar-brand,
   .navbar-nav .nav-link {
     color: #fff; /* White text color */
-    font-weight: bold; /* Bold font weight */
+    font-weight: bold; 
   }
 </style>
 
