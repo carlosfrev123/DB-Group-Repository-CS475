@@ -2,12 +2,9 @@
 require("connect-db.php");    // include("connect-db.php");
 require("home-db.php");
 $products = getAvailableProducts($db);
-
-// $displayedPrice = updatedPriceFetch($displayedSize, $displayedName);  
 ?>
 
-<?php   // form handling
-
+<?php
 ?>
 
 <!DOCTYPE html>
@@ -36,7 +33,46 @@ $products = getAvailableProducts($db);
             padding: 0;
             background-color: #f4f4f4;
         }
-        .container {
+
+        .filter-option {
+            margin-top: 20px;
+            margin-left: 20px;
+        }
+
+        .product-details {
+            display: flex;
+            align-items: center;
+        }
+
+        .size-input,
+        .quantity-input {
+            margin-right: 20px;
+        }
+
+        .size-input select{
+            
+            width: 50px;
+            height: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+            flex-wrap: wrap
+    
+        }
+
+        .quantity-input input[type="number"] {
+            
+            width: 50px;
+            height: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+            flex-wrap: wrap
+        }
+
+        .product-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
@@ -50,20 +86,78 @@ $products = getAvailableProducts($db);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 20px;
-            width: calc(33.33% - 20px); /* Adjust width for 3 boxes per row */
             box-sizing: border-box;
+            width: calc(33.33% - 20px)
         }
+        
         .product img {
             max-width: 100%;
             height: auto;
             border-radius: 8px;
         }
+
+        .add-to-cart-button {
+        border:2px solid black;
+        height: 40px;
+        background-color: #FFB6C1;
+        cursor: pointer;
+        margin-left: 100px;
+        margin-top: 30px;
+        }
+
+        .add-to-cart-button:hover{
+            background-color: grey
+        }
+
+        .quantity-input {
+            display: flex;
+        }
+
+        .quantity-btn {
+        width: 30px;
+        height: 30px;
+        background-color: #FFB6C1;
+        border: none;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        }
+
     </style>
 </head>
 
 <body>  
     
 <?php include("header.php"); ?>
+
+
+    <div class="filter-option">
+        <label for="sizeFilter">Filter:</label>
+        <select id="filter" name="filter" onchange="filterProducts(this.value)">
+            <option value="no_filter">None</option>
+            <option value="lowest_to_highest">Lowest to Highest Price</option>
+            <option value="highest_to_lowest">Highest to Lowest Price</option>
+            <option value="most_reviewed">Most Reviewed</option>
+        </select>
+    </div>
+    
+    <div class="product-container">
+    <?php foreach ($products as $product): ?>
+        <?php $uniqueId = htmlspecialchars($product['Name']) . rand(); ?>
+        <div class="product">
+            <h2> <h2 style="color: #FFB6C1;"><?php echo htmlspecialchars($product['Name']); ?></h2>
+            <p>Price: $<span id="price-<?php echo $uniqueId; ?>"><?php echo htmlspecialchars($product['Price']); ?></span></p>
+            <label for="size-<?php echo $uniqueId; ?>">Size:</label>
+            <select id="size-<?php echo $uniqueId; ?>" name="size" onchange="updatedPriceFetch('<?php echo $uniqueId; ?>', this.value, '<?php echo addslashes(htmlspecialchars($product['Name'])); ?>')">
+                <option value="8oz">8oz</option>
+                <option value="12oz">12oz</option>
+            </select>
+       </div>
+    <?php endforeach; ?>
+</div>
+
 <script>
 function updatedPriceFetch(uniqueId, selectedSize, productName) {
     const xhttp = new XMLHttpRequest();
@@ -75,35 +169,90 @@ function updatedPriceFetch(uniqueId, selectedSize, productName) {
     xhttp.open("GET", "home-db.php?size=" + selectedSize + "&Name=" + encodeURIComponent(productName), true);
     xhttp.send();
 }
+
+displayProducts(<?php echo json_encode($products); ?>);
+
+function filterProducts(filterOption) {
+    const products = <?php echo json_encode($products); ?>;
+    let filteredProducts = products.slice();
+    switch(filterOption) {
+        case 'lowest_to_highest':
+            filteredProducts.sort((a, b) => a.Price - b.Price);
+            break;
+        case 'highest_to_lowest':
+            filteredProducts.sort((a, b) => b.Price - a.Price);
+            break;
+        case 'most_reviewed':
+            // Add logic to sort by most reviewed later
+            break;
+        default:
+            break;
+    }
+
+    displayProducts(filteredProducts);
+}
+
+function displayProducts(products) {
+    const container = document.querySelector('.product-container');
+    container.innerHTML = ''; 
+    products.forEach(product => {
+        console.log(product.product_ID)
+        const uniqueId = product.Name + Math.random();
+        container.innerHTML += `
+            <div class="product">
+                <h2 style="color: #FFB6C1;">${product.Name}</h2>
+                <p>Price: $<span id="price-${uniqueId}">${product.Price}</span></p>
+               
+                <div class ="product-details">
+                    <div class ="size-input">
+                        <label for="size-${uniqueId}">Size:</label>
+                        <select id="size-${uniqueId}" name="size" onchange="updatedPriceFetch('${uniqueId}', this.value, '${product.Name}')">
+                            <option value="8oz">8oz</option>
+                            <option value="12oz">12oz</option>
+                        </select>
+                    </div>
+
+                <div class="quantity-input">
+                    <label for="quantity-${uniqueId}">Quantity: </label>
+                        <button class="quantity-btn" onclick="decreaseQuantity('${uniqueId}')">-</button>
+                        <input type="number" id="quantity-${uniqueId}" name="quantity" value="1">
+                        <button class="quantity-btn" onclick="increaseQuantity('${uniqueId}')">+</button>
+                    </div>
+                </div>
+                <button class="add-to-cart-button" onclick="addToCart('<?php echo $product['product_ID']; ?>', document.getElementById('quantity-${uniqueId}').value)">Add to Cart</button>
+        </div>
+        `;
+    })
+}
+
+function increaseQuantity(uniqueId) {
+    const quantityInput = document.getElementById(`quantity-${uniqueId}`);
+    quantityInput.value = parseInt(quantityInput.value) + 1;
+}
+
+function decreaseQuantity(uniqueId) {
+    const quantityInput = document.getElementById(`quantity-${uniqueId}`);
+    if (parseInt(quantityInput.value) > 1) {
+        quantityInput.value = parseInt(quantityInput.value) - 1;
+    }
+}
+
+function addToCart(product_ID, quantity){
+    const email = "<?php echo isset($_SESSION['email']) ? $_SESSION['email'] : ''; ?>";
+    if (email !== '') {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                // Handle response
+            }
+        };
+        xhttp.open("GET", `add-to-cart.php?product_ID=${product_ID}&quantity=${quantity}&user_ID=<?php echo getUserId('email'); ?>`, true);
+        xhttp.send();
+    } else {
+        // Handle case where user is not logged in
+    }
+}
 </script>
-
-    <div class="container">
-        <div class="filter-option">
-            <label for="sizeFilter">Filter by size:</label>
-            <select id="sizeFilter" name="sizeFilter" onchange="filterProducts()">
-                <option value="">All</option>
-                <option value="8oz">8oz</option>
-                <option value="12oz">12oz</option>
-            </select>
-        </div>
-    </div>
-    
-    <div class="container">
-    <?php foreach ($products as $product): ?>
-        <?php $uniqueId = htmlspecialchars($product['Name']) . rand(); ?>
-        <div class="product">
-            <h2> <h2 style="color: #FFB6C1;"><?php echo htmlspecialchars($product['Name']); ?></h2>
-            <p>Price: $<span id="price-<?php echo $uniqueId; ?>"><?php echo htmlspecialchars($product['Price']); ?></span></p>
-            <label for="size-<?php echo $uniqueId; ?>">Size:</label>
-            <select id="size-<?php echo $uniqueId; ?>" name="size" onchange="updatedPriceFetch('<?php echo $uniqueId; ?>', this.value, '<?php echo addslashes(htmlspecialchars($product['Name'])); ?>')">
-                <option value="8oz">8oz</option>
-                <option value="12oz">12oz</option>
-            </select>
-        </div>
-    <?php endforeach; ?>
-</div>
-
-  
 <?php 
 //include('footer.html') ?> 
 

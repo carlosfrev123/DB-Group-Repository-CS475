@@ -1,7 +1,31 @@
-<?php 
-require("connect-db.php");
-//require("home-db.php");
+<?php
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+// session_start();
+// echo "Session started. ";
 
+require("connect-db.php");
+// echo "Database connected. ";
+
+require("login-db.php");
+// echo "Login functions loaded. ";
+
+if (isset($_POST['loginBtn'])) {
+   
+    $email = $_POST['Email'] ?? 'No email';
+    $password = $_POST['Password'] ?? 'No password';
+    // echo "Email: $email, Password: $password ";
+
+    if (checkUserCredentials($email, $password)) {
+        echo "Login Successful!";
+        session_start();
+        $_SESSION['email'] = $email;
+        header("Location: home.php");
+    } else {
+        echo "User not found :(";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -55,13 +79,13 @@ require("connect-db.php");
       <input type='text' class='form-control' 
              id='Email' name='Email' 
              placeholder='Enter your email' 
-             value="<?php if ($request_to_update != null) echo $request_to_update['reqDate'] ?>" />
+             
     </div>
     <div class='mb-3'>
       <label for="Password" class="form-label">Password:</label>
       <input type='password' class='form-control' id='Password' name='Password'
              placeholder='Enter your password'
-             value="<?php if ($request_to_update != null) echo $request_to_update['reqBy'] ?>" />
+             
     </div>
     <div class="mb-3">
       <input type="submit" value="Login" id="loginBtn" name="loginBtn" class="btn btn-pink" />

@@ -2,10 +2,20 @@
 require("connect-db.php");
 require("signup-db.php");
 
+session_start(); // Start the session at the beginning of the script
+
 // Check if the sign up button has been clicked
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty($_POST['signupBtn'])) {
-        addAccount($_POST['email'], $_POST['password'], $_POST['name'], $_POST['address'], $_POST['age']);
+        $email = $_POST['email']; // Make sure to capture the email from POST data
+        $password = $_POST['password'];
+        $name = $_POST['name'];
+        $address = $_POST['address'];
+        $age = $_POST['age'];
+
+        addAccount($email, $password, $name, $address, $age);
+        // Store email in session
+        $_SESSION['email'] = $email;
         // Redirect to home.php after successful signup
         header('Location: home.php');
         exit();

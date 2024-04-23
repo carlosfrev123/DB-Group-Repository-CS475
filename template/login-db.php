@@ -1,4 +1,5 @@
 <?php
+// require("connect-db.php");
 function addRequests($reqDate, $roomNumber, $reqBy, $repairDesc, $reqPriority)
 {
     global $db;
@@ -86,6 +87,27 @@ function deleteRequest($reqId)
     $statement->execute();
     $statement->closeCursor();
     
+}
+function checkUserCredentials($email, $password) {
+    global $db;
+    $query = "SELECT * FROM UserInfo WHERE email = :email AND password = :password";
+
+    try {
+        $statement = $db->prepare($query);
+        $statement->bindValue(':email', $email);
+        $statement->bindValue(':password', $password);
+        $statement->execute();
+        $user = $statement->fetch();
+        $statement->closeCursor();
+        
+        if ($user) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (PDOException $e) {
+        return false; // Or handle the error in a way that suits your needs
+    }
 }
 
 ?>

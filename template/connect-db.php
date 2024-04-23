@@ -8,7 +8,7 @@
 // $dbname = 'your-database-name';           // e.g., 'guestbook';
 // $dsn = "mysql:unix_socket=/cloudsql/instance-connection-name;dbname=your-database-name";
 //       e.g., "mysql:unix_socket=/cloudsql/cs4750:us-east4:db-demo;dbname=guestbook";
-
+//
 // to get instance connection name, go to GCP SQL overview page
 ////////////////////////////////////////////
 
@@ -30,18 +30,18 @@
 ////////////////////////////////////////////
 
 /** S24, PHP (on GCP, local XAMPP, or CS server) connect to MySQL (on local XAMPP) **/
-// $username = '-----';
-// $password = '-----';
+// $username = 'cfr5spw';
+// $password = 'Alco0022!';
 // // $host = 'localhost:3306';
-// $dbname = '-----';    
+// $dbname = 'cfr5spw';    
 // $dsn = "mysql:host=$host;dbname=$dbname";  
 ////////////////////////////////////////////
 
 /** S24, PHP (on GCP, local XAMPP, or CS server) connect to MySQL (on CS server) **/
-$username = '-----'; 
-$password = '-------';
-$host = '-----';
-$dbname = '-----';
+$username = 'cfr5spw'; 
+$password = 'Alco0022!';
+$host = 'mysql01.cs.virginia.edu';
+$dbname = 'cfr5spw';
 $dsn = "mysql:host=$host;dbname=$dbname";
 
 ////////////////////////////////////////////
