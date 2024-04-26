@@ -2,9 +2,7 @@
 require("connect-db.php");    // include("connect-db.php");
 require("home-db.php");
 $products = getAvailableProducts($db);
-?>
 
-<?php
 ?>
 
 <!DOCTYPE html>
@@ -196,7 +194,6 @@ function displayProducts(products) {
     const container = document.querySelector('.product-container');
     container.innerHTML = ''; 
     products.forEach(product => {
-        console.log(product.product_ID)
         const uniqueId = product.Name + Math.random();
         container.innerHTML += `
             <div class="product">
@@ -219,7 +216,7 @@ function displayProducts(products) {
                         <button class="quantity-btn" onclick="increaseQuantity('${uniqueId}')">+</button>
                     </div>
                 </div>
-                <button class="add-to-cart-button" onclick="addToCart('<?php echo $product['product_ID']; ?>', document.getElementById('quantity-${uniqueId}').value)">Add to Cart</button>
+                <button class="add-to-cart-button" onclick="addToCart('${product.product_ID}', document.getElementById('quantity-${uniqueId}').value)">Add to Cart</button>
         </div>
         `;
     })
@@ -237,20 +234,28 @@ function decreaseQuantity(uniqueId) {
     }
 }
 
+
+
 function addToCart(product_ID, quantity){
     const email = "<?php echo isset($_SESSION['email']) ? $_SESSION['email'] : ''; ?>";
-    if (email !== '') {
-        const xhttp = new XMLHttpRequest();
-        xhttp.onload = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                // Handle response
+    const user_ID = "<?php echo getUserId(isset($_SESSION['email']) ? $_SESSION['email'] : ''); ?>";
+    console.log("line 243 home.php - email: " + email);
+    console.log("Product ID: " + product_ID);
+    console.log("Quantity: " + quantity);
+    console.log("User ID: " + user_ID);
+
+    const xhttp = new XMLHttpRequest();
+    xhttp.onload = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            const response = this.responseText;
+            if( response == "success"){
+                alert("Item Added to Cart!");
             }
         };
-        xhttp.open("GET", `add-to-cart.php?product_ID=${product_ID}&quantity=${quantity}&user_ID=<?php echo getUserId('email'); ?>`, true);
-        xhttp.send();
-    } else {
-        // Handle case where user is not logged in
-    }
+    };
+    xhttp.open("GET", "home-db.php?product_ID="+ product_ID + "&quantity=" + quantity + "&user_ID=" + user_ID, true);
+    xhttp.send();
+   
 }
 </script>
 <?php 

@@ -1,8 +1,6 @@
 <?php
 require 'connect-db.php';
 
-
-
 function getUserId($email){
     global $db;
     $query = "SELECT user_ID FROM UserInfo WHERE email = :email";
@@ -29,16 +27,25 @@ function getCartItems($userId){
   return $result;
 }
 
-function updateCartItemQuantity($product_ID, $newQuantity, $userId){
-    global $db;
-    $query = "UPDATE CartItem SET quantity = :newQuantity WHERE product_ID = :product_ID AND user_ID = :user_ID";
+function updateCartItemQuantity($userId, $productId, $quantity){
+  global $db;
+  $query = "UPDATE CartItem SET quantity = :quantity WHERE user_ID = :user_ID AND product_ID = :product_ID";
   
-    $statement = $db->prepare($query);
-    $statement->bindValue(':newQuantity', $newQuantity);
-    $statement->bindValue(':product_ID', $product_ID);
-    $statement->bindValue(':user_ID', $userId);
-    $statement->execute();
-    $statement->closeCursor();
+  $statement = $db->prepare($query);
+  $statement->bindValue(':quantity', $quantity);
+  $statement->bindValue(':user_ID', $userId);
+  $statement->bindValue(':product_ID', $productId);
+  $statement->execute();
+  $result = $statement->fetch();
+  $statement->closeCursor();
+
+  return $result;
 }
+
+//unfinished code 
+// function deleteCartItem(){
+//   global $db;
+//   $query = "DELETE FROM CartItem WHERE user_ID = :user_ID AND product_ID = :product_ID"
+// }
 
 ?>

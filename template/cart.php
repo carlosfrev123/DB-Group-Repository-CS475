@@ -1,12 +1,18 @@
-<?php 
+<?php
 session_start();
 require("connect-db.php"); 
 require("cart-db.php");
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['updateBtn'])) {
-    $itemId = $_POST['product_ID'];
-    $newQuantity = $_POST['new_quantity'];
-    updateCartItemQuantity($product_ID, $newQuantity, getUserId($_SESSION['email'])); // Function to update the quantity in the database
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (!empty($_POST['updateBtn'])) {
+        $userId = getUserId($_SESSION['email']);
+        $productId = $_POST['product_ID'];
+        $quantity = $_POST['quantity'];
+        
+        updateCartItemQuantity($userId, $productId, $quantity);
+        //header("Location: cart.php");
+        //exit();
+    }
 }
 ?>
 
@@ -80,12 +86,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['updateBtn'])) {
 </head>
 
 <body>  
-<body>  
     <?php include("header.php"); ?>
 
     <div class="product-container">
         <?php 
-        $cartItems = getCartItems(getUserId($_SESSION['email'])); // Fetch cart items from the database using appropriate SQL queries
+        $cartItems = getCartItems(getUserId($_SESSION['email'])); 
 
         // Loop through cart items and display them with quantity adjustment options
         foreach ($cartItems as $item) {
@@ -94,12 +99,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['updateBtn'])) {
                 <h2><?php echo $item['Name']; ?></h2>
                 <p>Price: $<?php echo $item['Price']; ?></p>
                 <p>Size: <?php echo $item['size']; ?></p>
-                <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-                    <input type="hidden" name="item_id" value="<?php echo $item['ID']; ?>">
-                    <label for="quantity">Quantity:</label>
-                    <input type="number" name="new_quantity" value="<?php echo $item['quantity']; ?>" min="1">
+                <p>Quantity: <?php echo $item['quantity']; ?></p>
+                <form method="post">
+                    <input type="hidden" name="product_id" value="<?php echo $item['product_ID']; ?>">
+                    <input type="number" name="quantity" value="<?php echo $item['quantity']; ?>">
                     <input type="submit" name="updateBtn" value="Update Quantity" class="add-to-cart-button" style="background-color: #FFB6C1; margin-left: 10px;">
-                    
+                    <input type="submit" name="deleteBtn" value="Remove Item" class="remove-from-cart-button" style="background-color: #FFB6C1; margin-left: 10px;">
                 </form>
             </div>
             <?php
