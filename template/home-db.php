@@ -1,30 +1,54 @@
-<?php
+<?php 
 
-require 'connect-db.php'; 
+require("connect-db.php"); 
+session_start();
+
 if (isset($_GET['size']) && isset($_GET['Name'])) {
     $size = $_GET['size'];
     $name = $_GET['Name'];
-
-    // Call function to get price
     $result = updatePrice($size, $name);
-    echo htmlspecialchars($result['Price']); // Price output
+    echo htmlspecialchars($result['Price']); 
 }
 
 if (isset($_GET['quantity']) && isset($_GET['user_ID']) && isset($_GET['product_ID'])) {
-    echo "Line 13 ";
     $product_ID = $_GET['product_ID'];
     $quantity = $_GET['quantity'];
     $user_ID = $_GET['user_ID'];
-    
     
     $result = InsertToCart($product_ID, $user_ID, $quantity);
    
 }
 
-echo "Product ID: " . $_GET['product_ID'] . "<br>";
-echo "Quantity: " . $_GET['quantity'] . "<br>";
-echo "User ID: " . $_GET['user_ID'] . "<br>";
+if (isset($_GET['product_ID']) && isset($_GET['user_ID']) && isset($_GET['add'])) {
+    $product_ID = $_GET['product_ID'];
+    $user_ID = $_GET['user_ID'];
+    
+    $result = addToWishlist($product_ID, $user_ID);
+   
+}
 
+
+if (isset($_GET['product_ID'])) {
+    $product_ID = $_GET['product_ID'];
+    
+    $query = "SELECT Reviews.usercomment, Reviews.comment_date, UserInfo.name 
+              FROM Reviews 
+              JOIN UserInfo ON Reviews.user_ID = UserInfo.user_ID 
+              WHERE Reviews.product_ID = :product_ID";
+
+    $statement = $db->prepare($query);
+    $statement->bindValue(':product_ID', $product_ID);
+    $statement->execute();
+    $reviews = $statement->fetchAll(PDO::FETCH_ASSOC);
+    $statement->closeCursor();
+
+    echo json_encode($reviews);
+}
+
+
+// echo "Product ID: " . $_GET['product_ID'] . "<br>";
+// echo "Quantity: " . $_GET['quantity'] . "<br>";
+// echo "User ID: " . $_GET['user_ID'] . "<br>";
 
 // get Products query
 function getAvailableProducts($db) {
@@ -68,9 +92,6 @@ function getUserId($email){
     return $result['user_ID'];   
 }
 
-
-
-
 function InsertToCart($product_ID, $user_ID, $quantity){
     global $db;
    
@@ -80,6 +101,20 @@ function InsertToCart($product_ID, $user_ID, $quantity){
     $statement->bindValue(':product_ID', $product_ID);
     $statement->bindValue(':user_ID', $user_ID);
     $statement->bindValue(':quantity', $quantity);
+    $success = $statement->execute();
+    $statement->closeCursor();
+
+}
+
+function addToWishlist($product_ID, $user_ID){
+    global $db;
+   
+    $query = "INSERT INTO Wishlist (product_ID, user_ID) VALUES (:product_ID, :user_ID)";
+    
+    $statement = $db->prepare($query);
+    $statement->bindValue(':product_ID', $product_ID);
+    $statement->bindValue(':user_ID', $user_ID);
+    // $statement->bindValue(':quantity', $quantity);
     $success = $statement->execute();
     $statement->closeCursor();
 

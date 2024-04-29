@@ -1,14 +1,21 @@
-<?php
+<?php 
 
-require_once __DIR__ . '/../.env';
+/** S24, PHP (on GCP, local XAMPP, or CS server) connect to MySQL (on CS server) **/
 
-$username = getenv('username');
-$password = getenv('password');
-$host = getenv('host');
-$dbname = getenv('dbname');
-$dsn = "mysql:host=$host;dbname=$dbname";
 
-////////////////////////////////////////////
+/** Load environment variables from .env file **/
+$envFilePath = __DIR__ . '/../.env';
+if (file_exists($envFilePath)) {
+    $envVariables = parse_ini_file($envFilePath);
+    $username = $envVariables['username'];
+    $password = $envVariables['password'];
+    $host = $envVariables['host'];
+    $dbname = $envVariables['dbname'];
+    $dsn = "mysql:host=$host;dbname=$dbname";
+} else {
+    echo "<p>.env file not found.</p>";
+    exit;
+}
 
 /** connect to the database **/
 try 
@@ -20,6 +27,8 @@ try
 }
 catch (PDOException $e)     // handle a PDO exception (errors thrown by the PDO library)
 {
+   // Call a method from any object, use the object's name followed by -> and then method's name
+   // All exception objects provide a getMessage() method that returns the error message 
    $error_message = $e->getMessage();        
    echo "<p>An error occurred while connecting to the database: $error_message </p>";
 }

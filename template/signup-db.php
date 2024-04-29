@@ -1,6 +1,5 @@
-<?php
-function addAccount($email, $password, $name, $address, $age)
-{
+<?php 
+function addAccount($email, $password, $name, $address, $age){
     global $db;
     $query = "INSERT INTO UserInfo (email, password, name, address, age) VALUES (:email, :password, :name, :address, :age)";
     

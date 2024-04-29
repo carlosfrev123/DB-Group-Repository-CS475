@@ -1,8 +1,9 @@
 <?php 
-require("connect-db.php");    // include("connect-db.php");
-require("home-db.php");
-$products = getAvailableProducts($db);
 
+require("connect-db.php");
+require("home-db.php");
+
+$products = getAvailableProducts($db);
 ?>
 
 <!DOCTYPE html>
@@ -107,6 +108,30 @@ $products = getAvailableProducts($db);
             background-color: grey
         }
 
+        .add-to-wishlist-button {
+        border:2px solid black;
+        height: 40px;
+        background-color: #FFB6C1;
+        cursor: pointer;
+        margin-left: 100px;
+        margin-top: 30px;
+        }
+
+        .add-to-wishlist-button:hover{
+            background-color: grey
+        }
+        .review-button {
+        border:2px solid black;
+        height: 40px;
+        background-color: #FFB6C1;
+        cursor: pointer;
+        margin-left: 100px;
+        margin-top: 30px;
+        }
+
+        .review-button:hover{
+            background-color: grey
+        }
         .quantity-input {
             display: flex;
         }
@@ -180,9 +205,6 @@ function filterProducts(filterOption) {
         case 'highest_to_lowest':
             filteredProducts.sort((a, b) => b.Price - a.Price);
             break;
-        case 'most_reviewed':
-            // Add logic to sort by most reviewed later
-            break;
         default:
             break;
     }
@@ -217,6 +239,20 @@ function displayProducts(products) {
                     </div>
                 </div>
                 <button class="add-to-cart-button" onclick="addToCart('${product.product_ID}', document.getElementById('quantity-${uniqueId}').value)">Add to Cart</button>
+                <button class="add-to-wishlist-button" onclick="addToWishlist('${product.product_ID}')">Add to Wishlist</button>
+                <button class="review-button" onclick="showReviews('${product.product_ID}')">Reviews</button>
+
+            <div id="modal-${product.product_ID}" class="w3-modal">
+                <div class="w3-modal-content">
+                    <header class="w3-container w3-pink">
+                        <span onclick="document.getElementById('modal-${product.product_ID}').style.display='none'"
+                        class="w3-button w3-display-topright">&times;</span>
+                        <h2>Reviews for ${product.Name}</h2>
+                    </header>
+                    <div class="w3-container" id="reviews-container-${product.product_ID}">
+                    </div>
+                </div>
+            </div>
         </div>
         `;
     })
@@ -234,6 +270,51 @@ function decreaseQuantity(uniqueId) {
     }
 }
 
+
+function showReviews(productID) {
+    const modal = document.getElementById(`modal-${productID}`);
+    modal.style.display = 'block'; 
+
+    const reviewsContainer = document.getElementById(`reviews-container-${productID}`);
+    reviewsContainer.innerHTML = `
+        <form onsubmit="submitReview(event, '${productID}')">
+            <textarea id="review-text-${productID}" required placeholder="Write your review here... " rows="4" style="width:100%;"></textarea>
+            <button type="submit">Submit Review</button>
+        </form>
+        <div id="reviews-list-${productID}"></div>
+    `;
+
+    const xhttp = new XMLHttpRequest();
+    xhttp.onload = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            const reviews = JSON.parse(this.responseText);
+            const reviewsList = document.getElementById(`reviews-list-${productID}`);
+            reviewsList.innerHTML = '';
+            reviews.forEach(review => {
+                const reviewElement = document.createElement('div');
+                reviewElement.innerHTML = `<p>${review.name}: ${review.usercomment} (Posted on: ${review.comment_date})</p>`;
+                reviewsList.appendChild(reviewElement);
+            });
+        }
+    };
+    xhttp.open("GET", "home-db.php?product_ID=" + productID, true);
+    xhttp.send();
+}
+
+function submitReview(event, productID) {
+    console.log("home.php line 284: in submitReview Func!!!!");
+    event.preventDefault();
+    const reviewText = document.getElementById(`review-text-${productID}`).value;
+    const xhttp = new XMLHttpRequest();
+    xhttp.onload = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            showReviews(productID); 
+        }
+    };
+    xhttp.open("POST", "submit-review.php", true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.send(`product_ID=${productID}&usercomment=${encodeURIComponent(reviewText)}`);
+}
 
 
 function addToCart(product_ID, quantity){
@@ -257,6 +338,24 @@ function addToCart(product_ID, quantity){
     xhttp.send();
    
 }
+
+function addToWishlist(product_ID){
+    const email = "<?php echo isset($_SESSION['email']) ? $_SESSION['email'] : ''; ?>";
+    const user_ID = "<?php echo getUserId(isset($_SESSION['email']) ? $_SESSION['email'] : ''); ?>";
+    const add = "True";
+    const xhttp = new XMLHttpRequest();
+    xhttp.onload = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            const response = this.responseText;
+            if( response == "success"){
+                alert("Item Added to Wishlist!");
+            }
+        };
+    };
+    xhttp.open("GET", "home-db.php?product_ID="+ product_ID + "&user_ID=" + user_ID + "&add=" + add, true);
+    xhttp.send();
+}
+
 </script>
 <?php 
 //include('footer.html') ?> 

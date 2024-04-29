@@ -1,7 +1,9 @@
-<?php
+<?php 
+
 session_start();
 require("connect-db.php"); 
 require("cart-db.php");
+// $_SESSION['cc'] = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty($_POST['updateBtn'])) {
@@ -13,6 +15,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         //header("Location: cart.php");
         //exit();
     }
+
+    if (!empty($_POST['deleteBtn'])) {
+        $userId = getUserId($_SESSION['email']);
+        echo "cart.php line 25: ", $userId;
+        $productId = $_POST['product_ID'];
+        deleteCartItem($productId, $userId);
+        //header("Location: cart.php");
+        //exit();
+    }
+    if (!empty($_POST['checkoutBtn'])) {
+        $userId = getUserId($_SESSION['email']);
+        $cartItems = getCartItems($userId);
+        $cc = $_SESSION['cc'];
+        echo "line 35 cart.php: ", $cartItems[1];
+        if (checkoutCart($userId, $cartItems, $cc)) {
+            header("Location: home.php");
+            exit();
+        } else {
+            echo "Failed to checkout. Please try again later.";
+        }
+        $_SESSION['cc'] = "";
+    }
+    if (!empty($_POST['applyCouponBtn'])) {
+        // global $cc;
+        $userId = getUserId($_SESSION['email']);
+        $couponCode = $_POST['couponCode'];
+        if(couponexists($couponCode) == 1){
+            // echo "BLAH BLAH";
+            if(usedcoupon($couponCode, $userId) == 1){
+                echo "You've already used this coupon. Try another one.";
+                $cc = "";   
+            }
+            else{
+                $_SESSION['cc'] = $couponCode;
+                // applyCouponToOrder($cc, $userId);
+                echo "Coupon Applied";
+            }
+        }
+        else{
+            echo "Invalid Coupon";
+        }
+    }
+
+    
 }
 ?>
 
@@ -63,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             padding: 20px;
             margin-bottom: 20px;
             box-sizing: border-box;
-            width: calc(33.33% - 20px)
+            width: calc(60% - 20px);
         }
         
         .product img {
@@ -72,27 +118,66 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 8px;
         }
 
-        .add-to-cart-button {
+        .remove-from-cart-button {
         border: 1px solid black;
         background-color: #FFB6C1;
         cursor: pointer;
         margin-left: 100px;
+        background-color: #FFB6C1; 
+        margin-left: 10px;
         }
 
-        .add-to-cart-button:hover{
+        .remove-from-cart-button:hover{
             background-color: grey
         }
+
+        .update-button {
+        border: 1px solid black;
+        background-color: #FFB6C1;
+        cursor: pointer;
+        margin-left: 100px;
+        background-color: #FFB6C1; 
+        margin-left: 10px;
+        }
+
+        .update-button:hover{
+            background-color: grey
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            background-color: #FFB6C1;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .checkout-btn {
+            width: 300px;
+            height: 30px;
+            background-color: #FFB6C1;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
     </style>
 </head>
 
 <body>  
     <?php include("header.php"); ?>
 
+    
     <div class="product-container">
         <?php 
         $cartItems = getCartItems(getUserId($_SESSION['email'])); 
-
-        // Loop through cart items and display them with quantity adjustment options
         foreach ($cartItems as $item) {
             ?>
             <div class="product">
@@ -101,16 +186,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <p>Size: <?php echo $item['size']; ?></p>
                 <p>Quantity: <?php echo $item['quantity']; ?></p>
                 <form method="post">
-                    <input type="hidden" name="product_id" value="<?php echo $item['product_ID']; ?>">
-                    <input type="number" name="quantity" value="<?php echo $item['quantity']; ?>">
-                    <input type="submit" name="updateBtn" value="Update Quantity" class="add-to-cart-button" style="background-color: #FFB6C1; margin-left: 10px;">
-                    <input type="submit" name="deleteBtn" value="Remove Item" class="remove-from-cart-button" style="background-color: #FFB6C1; margin-left: 10px;">
+                    <input type="hidden" name="product_ID" value="<?php echo $item['product_ID']; ?>">
+                    <input type="text" name="quantity" value="<?php echo $item['quantity']; ?>" readonly class="quantity-input">
+                    <button type="button" onclick="increaseQuantity(this)" class="quantity-btn">+</button>
+                    <button type="button" onclick="decreaseQuantity(this)" class="quantity-btn">-</button>
+                    <input type="submit" name="updateBtn" value="Update Quantity" class="update-button">
+                    <input type="submit" name="deleteBtn" value="Remove Item" class="remove-from-cart-button">
                 </form>
             </div>
             <?php
         }
         ?>
     </div>
+    <div class="coupon-container">
+    <form method="post">
+        <label for="couponCode">Coupon Code:</label>
+        <input type="text" id="couponCode" name="couponCode">
+        <input type="submit" name="applyCouponBtn" value="Apply Coupon">
+    </form>
+</div>
+    <div class="check-out-container">
+    <form method="post" style="margin-top: 20px;">
+        <input type="submit" name="checkoutBtn" value="Check Out" class="checkout-btn" style="background-color: #FFB6C1;">
+    </form>
+    </div>
+
+    <script>
+        function increaseQuantity(btn) {
+            var input = btn.parentNode.querySelector('input[name="quantity"]');
+            input.value = parseInt(input.value) + 1;
+        }
+
+        function decreaseQuantity(btn) {
+            var input = btn.parentNode.querySelector('input[name="quantity"]');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        }
+    </script>
+
     </body>
 
 </html>
